@@ -13,6 +13,8 @@ A lightweight, self-contained web app to review your Kindle highlights and notes
 - **Favorites** — Star clippings to save them for later. Persisted in `localStorage`.
 - **Highlight / Note Distinction** — Visual badges and color accents differentiate highlights (orange) from notes (blue).
 - **Statistics Dashboard** — Total counts, top books bar chart, and monthly reading timeline.
+- **Dark Mode** — Automatically follows system preference (`prefers-color-scheme`).
+- **Token Auth** — Nginx cookie-based token protection for self-hosted deployments.
 
 ## Quick Start
 
@@ -46,6 +48,7 @@ python3 -m http.server 8000
 ```
 kindle-reviewer/
 ├── index.html            # The web app (HTML + CSS + JS, self-contained)
+├── auth.html             # Token login page for self-hosted deployments
 ├── parse_clippings.py    # Python parser for Kindle's My Clippings.txt
 ├── data.js               # Parsed clippings data (generated, gitignored)
 └── README.md
