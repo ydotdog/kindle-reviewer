@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kindle Clippings Reviewer</title>
+<style>
+:root {
+  --primary: #C2410C;
+  --primary-hover: #9A3412;
+  --primary-light: #FFF7ED;
+  --primary-pale: #FDBA74;
+  --bg: #F8F6F3;
+  --card: #FFFFFF;
+  --text: #1C1917;
+  --text-secondary: #78716C;
+  --text-tertiary: #A8A29E;
+  --border: #E7E5E4;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.1);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --note-accent: #2563EB;
+  --note-light: #EFF6FF;
+  --highlight-accent: #C2410C;
+  --highlight-light: #FFF7ED;
+  --fav-color: #E6A817;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* === Header === */
+.header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
+.header h1 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+.search-box {
+  flex: 1;
+  max-width: 420px;
+  position: relative;
+}
+.search-box svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+.search-box input {
+  width: 100%;
+  padding: 8px 14px 8px 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  outline: none;
+  background: var(--bg);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  color: var(--text);
+}
+.search-box input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(194,65,12,0.1);
+}
+
+/* === Nav === */
+.nav {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+}
+.nav-btn {
+  padding: 11px 18px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.nav-btn:hover { color: var(--text); }
+.nav-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* === Main === */
+.main {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+.view { display: none; }
+.view.active { display: block; }
+
+/* === Clip Card === */
+.clip-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px 24px;
+  margin-bottom: 14px;
+  border-left: 3px solid var(--highlight-accent);
+  transition: box-shadow 0.2s;
+}
+.clip-card:hover { box-shadow: var(--shadow-md); }
+.clip-card.note-card { border-left-color: var(--note-accent); }
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.type-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-highlight { background: var(--highlight-light); color: var(--highlight-accent); }
+.badge-note { background: var(--note-light); color: var(--note-accent); }
+
+.fav-btn {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  transition: transform 0.15s, color 0.15s;
+  padding: 2px 4px;
+  line-height: 1;
+  user-select: none;
+}
+.fav-btn:hover { transform: scale(1.15); }
+.fav-btn.fav-active { color: var(--fav-color); }
+.fav-pop { animation: starPop 0.25s ease; }
+@keyframes starPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+.card-content {
+  font-size: 1rem;
+  line-height: 1.85;
+  color: var(--text);
+  margin-bottom: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.card-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0;
+}
+.card-book {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.card-author {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 3px;
+}
+.card-meta {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+mark {
+  background: #FDE68A;
+  padding: 0 2px;
+  border-radius: 2px;
+  color: inherit;
+}
+
+/* === Random View === */
+.random-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 50vh;
+  justify-content: center;
+}
+.random-card-wrapper {
+  width: 100%;
+  max-width: 700px;
+}
+.random-card-wrapper .clip-card {
+  border-left: none;
+  border-top: 3px solid var(--highlight-accent);
+  padding: 36px 32px;
+  box-shadow: var(--shadow-md);
+}
+.random-card-wrapper .clip-card.note-card {
+  border-top-color: var(--note-accent);
+}
+.random-card-wrapper .card-content {
+  font-size: 1.15rem;
+  text-align: center;
+}
+.random-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+.btn-primary {
+  padding: 10px 28px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-primary:hover { background: var(--primary-hover); }
+.random-counter {
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+}
+.fade-in { animation: fadeIn 0.25s ease; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* === Browse View === */
+.browse-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.book-select {
+  flex: 1;
+  min-width: 180px;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  background: var(--card);
+  outline: none;
+  cursor: pointer;
+  color: var(--text);
+}
+.book-select:focus { border-color: var(--primary); }
+.result-count {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.btn-load-more {
+  display: block;
+  margin: 20px auto;
+  padding: 9px 22px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-load-more:hover { border-color: var(--primary); color: var(--primary); }
+
+/* === Stats View === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 14px;
+  margin-bottom: 32px;
+}
+.stat-card {
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 18px 16px;
+  text-align: center;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.stat-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1.2;
+}
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.stats-section { margin-top: 28px; }
+.stats-section h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.bar-chart { display: flex; flex-direction: column; gap: 6px; }
+.bar-item { display: flex; align-items: center; gap: 10px; }
+.bar-label {
+  width: 220px;
+  font-size: 0.78rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  flex-shrink: 0;
+}
+.bar-track {
+  flex: 1;
+  height: 22px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-light), var(--primary-pale));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  min-width: 2px;
+}
+.bar-count {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  width: 36px;
+  flex-shrink: 0;
+}
+
+/* === Empty State === */
+.empty-state {
+  text-align: center;
+  padding: 56px 20px;
+  color: var(--text-secondary);
+}
+.empty-state .empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+.empty-state p { font-size: 0.9rem; }
+
+/* === Search Header === */
+.search-header {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.search-header strong { color: var(--text); }
+
+/* === Responsive === */
+@media (max-width: 640px) {
+  .header { flex-wrap: wrap; gap: 10px; padding: 12px 16px; }
+  .search-box { max-width: 100%; order: 3; flex-basis: 100%; }
+  .main { padding: 16px 12px 48px; }
+  .random-card-wrapper .clip-card { padding: 24px 20px; }
+  .random-card-wrapper .card-content { font-size: 1.02rem; }
+  .bar-label { width: 110px; font-size: 0.72rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .clip-card { padding: 18px 16px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Kindle Reviewer</h1>
+  <div class="search-box">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="Search clippings or books...">
+  </div>
+</header>
+
+<nav class="nav">
+  <button class="nav-btn active" data-view="random">Random</button>
+  <button class="nav-btn" data-view="browse">Browse</button>
+  <button class="nav-btn" data-view="favorites">Favorites</button>
+  <button class="nav-btn" data-view="stats">Stats</button>
+</nav>
+
+<main class="main">
+  <!-- Random -->
+  <div id="randomView" class="view active random-view">
+    <div class="random-card-wrapper" id="randomCard"></div>
+    <div class="random-controls">
+      <button class="btn-primary" id="btnNext">Next Random</button>
+      <span class="random-counter" id="randomCounter"></span>
+    </div>
+  </div>
+
+  <!-- Browse -->
+  <div id="browseView" class="view">
+    <div class="browse-header">
+      <select class="book-select" id="bookSelect"><option value="">All Books</option></select>
+      <span class="result-count" id="browseCount"></span>
+    </div>
+    <div id="browseList"></div>
+    <button class="btn-load-more" id="browseMore" style="display:none">Load More</button>
+  </div>
+
+  <!-- Favorites -->
+  <div id="favoritesView" class="view">
+    <div id="favList"></div>
+    <div class="empty-state" id="favEmpty">
+      <div class="empty-icon">&#9734;</div>
+      <p>No favorites yet. Star clippings to save them here.</p>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div id="statsView" class="view">
+    <div class="stats-grid" id="statsCards"></div>
+    <div class="stats-section">
+      <h3>Top Books</h3>
+      <div class="bar-chart" id="booksChart"></div>
+    </div>
+    <div class="stats-section" style="margin-top:36px">
+      <h3>Reading Timeline</h3>
+      <div class="bar-chart" id="timelineChart"></div>
+    </div>
+  </div>
+
+  <!-- Search Results -->
+  <div id="searchView" class="view">
+    <div class="search-header" id="searchHeader"></div>
+    <div id="searchList"></div>
+    <button class="btn-load-more" id="searchMore" style="display:none">Load More</button>
+  </div>
+</main>
+
+<script src="data.js"></script>
+<script>
+/* ======= State ======= */
+let all = [];
+let queue = [], qi = 0;
+let favs = new Set();
+let curView = 'random', prevView = 'random';
+let bFiltered = [], bOff = 0;
+let sResults = [], sOff = 0;
+let curQuery = '';
+const PS = 20;
+
+/* ======= Init ======= */
+function init() {
+  if (typeof CLIPPINGS_DATA === 'undefined') {
+    document.querySelector('.main').innerHTML =
+      '<div class="empty-state"><p>Failed to load data. Make sure data.js is in the same folder.</p></div>';
+    return;
+  }
+  all = CLIPPINGS_DATA;
+  loadFavs();
+  shuffle();
+  showRandom();
+  fillBookSelect();
+  renderStats();
+  bind();
+}
+
+/* ======= Favorites Persistence ======= */
+function loadFavs() {
+  try { const s = localStorage.getItem('kr-favs'); if (s) favs = new Set(JSON.parse(s)); } catch(e) {}
+}
+function saveFavs() { localStorage.setItem('kr-favs', JSON.stringify([...favs])); }
+
+function toggleFav(id) {
+  if (favs.has(id)) favs.delete(id); else favs.add(id);
+  saveFavs();
+  document.querySelectorAll('.fav-btn[data-id="'+id+'"]').forEach(b => {
+    b.classList.toggle('fav-active', favs.has(id));
+    b.textContent = favs.has(id) ? '\u2605' : '\u2606';
+    b.classList.remove('fav-pop');
+    void b.offsetWidth;
+    b.classList.add('fav-pop');
+  });
+  if (curView === 'favorites') renderFavs();
+}
+// expose globally for onclick
+window.toggleFav = toggleFav;
+
+/* ======= Shuffle Queue (Fisher-Yates) ======= */
+function shuffle() {
+  queue = Array.from({length: all.length}, (_, i) => i);
+  for (let i = queue.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [queue[i], queue[j]] = [queue[j], queue[i]];
+  }
+  qi = 0;
+}
+
+/* ======= Random Card ======= */
+function showRandom() {
+  if (!all.length) return;
+  if (qi >= queue.length) shuffle();
+  const c = all[queue[qi]];
+  const el = document.getElementById('randomCard');
+  el.innerHTML = renderCard(c, true);
+  el.classList.remove('fade-in');
+  void el.offsetWidth;
+  el.classList.add('fade-in');
+  document.getElementById('randomCounter').textContent = (qi + 1) + ' / ' + all.length;
+  qi++;
+}
+
+/* ======= Card Rendering ======= */
+function renderCard(c, large, q) {
+  const isFav = favs.has(c.id);
+  const isNote = c.type === 'note';
+  const cls = 'clip-card' + (isNote ? ' note-card' : '');
+  const badge = isNote
+    ? '<span class="type-badge badge-note">Note</span>'
+    : '<span class="type-badge badge-highlight">Highlight</span>';
+
+  let content = esc(c.content);
+  if (q) {
+    const re = new RegExp('(' + escRe(q) + ')', 'gi');
+    content = content.replace(re, '<mark>$1</mark>');
+  }
+
+  const meta = [c.page ? 'p.' + c.page : '', c.location ? 'Loc ' + c.location : '', c.date || '']
+    .filter(Boolean).join(' &middot; ');
+
+  return '<div class="' + cls + '">' +
+    '<div class="card-top">' + badge +
+    '<button class="fav-btn' + (isFav ? ' fav-active' : '') + '" data-id="' + c.id + '" onclick="toggleFav(' + c.id + ')">' +
+    (isFav ? '\u2605' : '\u2606') + '</button></div>' +
+    '<div class="card-content">' + content + '</div>' +
+    '<div class="card-divider"></div>' +
+    '<div class="card-book">' + esc(c.book) + '</div>' +
+    (c.author ? '<div class="card-author">' + esc(c.author) + '</div>' : '') +
+    (meta ? '<div class="card-meta">' + meta + '</div>' : '') +
+    '</div>';
+}
+
+/* ======= View Switching ======= */
+function switchTo(v) {
+  if (curView !== 'search') prevView = curView;
+  curView = v;
+  if (v !== 'search') {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+  }
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  const map = {random:'randomView', browse:'browseView', favorites:'favoritesView', stats:'statsView', search:'searchView'};
+  document.getElementById(map[v]).classList.add('active');
+  if (v === 'favorites') renderFavs();
+  if (v === 'browse') renderBrowse();
+}
+
+/* ======= Browse ======= */
+function fillBookSelect() {
+  const counts = {};
+  all.forEach(c => counts[c.book] = (counts[c.book] || 0) + 1);
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const sel = document.getElementById('bookSelect');
+  sorted.forEach(([book, n]) => {
+    const o = document.createElement('option');
+    o.value = book;
+    o.textContent = book + ' (' + n + ')';
+    sel.appendChild(o);
+  });
+}
+
+function renderBrowse() {
+  const book = document.getElementById('bookSelect').value;
+  bFiltered = book ? all.filter(c => c.book === book) : all;
+  bOff = 0;
+  document.getElementById('browseCount').textContent = bFiltered.length + ' clippings';
+  document.getElementById('browseList').innerHTML = '';
+  appendBrowse();
+}
+
+function appendBrowse() {
+  const el = document.getElementById('browseList');
+  const items = bFiltered.slice(bOff, bOff + PS);
+  el.insertAdjacentHTML('beforeend', items.map(c => renderCard(c)).join(''));
+  bOff += PS;
+  document.getElementById('browseMore').style.display = bOff < bFiltered.length ? 'block' : 'none';
+}
+
+/* ======= Search ======= */
+let searchTimer;
+function handleSearch(q) {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    q = q.trim();
+    if (!q) { if (curView === 'search') switchTo(prevView); curQuery = ''; return; }
+    curQuery = q;
+    const lq = q.toLowerCase();
+    sResults = all.filter(c =>
+      c.content.toLowerCase().includes(lq) ||
+      c.book.toLowerCase().includes(lq) ||
+      c.author.toLowerCase().includes(lq)
+    );
+    sOff = 0;
+    document.getElementById('searchHeader').innerHTML =
+      'Found <strong>' + sResults.length + '</strong> results for "<strong>' + esc(q) + '</strong>"';
+    document.getElementById('searchList').innerHTML = '';
+    appendSearch();
+    if (curView !== 'search') switchTo('search');
+  }, 200);
+}
+
+function appendSearch() {
+  const el = document.getElementById('searchList');
+  const items = sResults.slice(sOff, sOff + PS);
+  el.insertAdjacentHTML('beforeend', items.map(c => renderCard(c, false, curQuery)).join(''));
+  sOff += PS;
+  document.getElementById('searchMore').style.display = sOff < sResults.length ? 'block' : 'none';
+}
+
+/* ======= Favorites View ======= */
+function renderFavs() {
+  const list = all.filter(c => favs.has(c.id));
+  const el = document.getElementById('favList');
+  const empty = document.getElementById('favEmpty');
+  if (!list.length) { el.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  el.innerHTML = list.map(c => renderCard(c)).join('');
+}
+
+/* ======= Stats ======= */
+function renderStats() {
+  const total = all.length;
+  const bookSet = new Set(all.map(c => c.book));
+  const hl = all.filter(c => c.type === 'highlight').length;
+  const nt = all.filter(c => c.type === 'note').length;
+
+  document.getElementById('statsCards').innerHTML =
+    statCard(total, 'Total') + statCard(bookSet.size, 'Books') +
+    statCard(hl, 'Highlights') + statCard(nt, 'Notes');
+
+  // Top books chart
+  const bc = {};
+  all.forEach(c => bc[c.book] = (bc[c.book] || 0) + 1);
+  const top = Object.entries(bc).sort((a, b) => b[1] - a[1]).slice(0, 25);
+  const maxB = top[0] ? top[0][1] : 1;
+  document.getElementById('booksChart').innerHTML = top.map(([b, n]) =>
+    '<div class="bar-item"><div class="bar-label" title="' + esc(b) + '">' + esc(b) +
+    '</div><div class="bar-track"><div class="bar-fill" style="width:' +
+    (n / maxB * 100) + '%"></div></div><div class="bar-count">' + n + '</div></div>'
+  ).join('');
+
+  // Timeline chart
+  const mc = {};
+  all.forEach(c => {
+    if (c.date && c.date.length >= 7) {
+      const m = c.date.substring(0, 7);
+      mc[m] = (mc[m] || 0) + 1;
+    }
+  });
+  const months = Object.entries(mc).sort((a, b) => a[0].localeCompare(b[0]));
+  const maxM = months.reduce((mx, e) => Math.max(mx, e[1]), 1);
+  document.getElementById('timelineChart').innerHTML = months.map(([m, n]) =>
+    '<div class="bar-item"><div class="bar-label">' + m +
+    '</div><div class="bar-track"><div class="bar-fill" style="width:' +
+    (n / maxM * 100) + '%"></div></div><div class="bar-count">' + n + '</div></div>'
+  ).join('');
+}
+
+function statCard(n, label) {
+  return '<div class="stat-card"><div class="stat-number">' + n +
+    '</div><div class="stat-label">' + label + '</div></div>';
+}
+
+/* ======= Utilities ======= */
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+/* ======= Event Binding ======= */
+function bind() {
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      document.getElementById('searchInput').value = '';
+      curQuery = '';
+      switchTo(b.dataset.view);
+    });
+  });
+  document.getElementById('btnNext').addEventListener('click', showRandom);
+  document.getElementById('bookSelect').addEventListener('change', renderBrowse);
+  document.getElementById('searchInput').addEventListener('input', e => handleSearch(e.target.value));
+  document.getElementById('browseMore').addEventListener('click', appendBrowse);
+  document.getElementById('searchMore').addEventListener('click', appendSearch);
+
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    if (curView === 'random' && (e.key === ' ' || e.key === 'ArrowRight')) {
+      e.preventDefault();
+      showRandom();
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
