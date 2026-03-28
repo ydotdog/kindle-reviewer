@@ -6,6 +6,7 @@
 <title>Kindle Clippings Reviewer</title>
 <style>
 :root {
+  color-scheme: light dark;
   --primary: #C2410C;
   --primary-hover: #9A3412;
   --primary-light: #FFF7ED;
@@ -389,6 +390,32 @@ mark {
   margin-bottom: 14px;
 }
 .search-header strong { color: var(--text); }
+
+/* === Dark Mode === */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #E97A2B;
+    --primary-hover: #F59E0B;
+    --primary-light: #2D1B0E;
+    --primary-pale: #9A4B1A;
+    --bg: #1A1A1E;
+    --card: #25252A;
+    --text: #E8E6E3;
+    --text-secondary: #A8A29E;
+    --text-tertiary: #6B6560;
+    --border: #35353A;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+    --note-accent: #60A5FA;
+    --note-light: #1E293B;
+    --highlight-accent: #E97A2B;
+    --highlight-light: #2D1B0E;
+    --fav-color: #F59E0B;
+  }
+  mark { background: #78550A; }
+  .search-box input:focus { box-shadow: 0 0 0 3px rgba(233,122,43,0.2); }
+}
 
 /* === Responsive === */
 @media (max-width: 640px) {

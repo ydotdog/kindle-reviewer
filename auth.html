@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kindle Reviewer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#F8F6F3;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);padding:40px 36px;max-width:340px;width:100%;text-align:center}
+h1{font-size:1.15rem;font-weight:700;color:#1C1917;margin-bottom:6px}
+.sub{font-size:.82rem;color:#78716C;margin-bottom:24px}
+input[type=password]{width:100%;padding:10px 14px;border:1px solid #E7E5E4;border-radius:8px;font-size:.9rem;outline:none;text-align:center;letter-spacing:2px;transition:border-color .2s}
+input:focus{border-color:#C2410C;box-shadow:0 0 0 3px rgba(194,65,12,.1)}
+.btn{width:100%;margin-top:14px;padding:10px;background:#C2410C;color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .15s}
+.btn:hover{background:#9A3412}
+.err{color:#DC2626;font-size:.8rem;margin-top:12px;display:none}
+.err.show{display:block}
+@media(prefers-color-scheme:dark){
+body{background:#1A1A1E}
+.card{background:#25252A;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+h1{color:#E8E6E3}
+.sub{color:#A8A29E}
+input[type=password]{background:#1A1A1E;border-color:#35353A;color:#E8E6E3}
+input:focus{border-color:#E97A2B;box-shadow:0 0 0 3px rgba(233,122,43,.2)}
+.btn{background:#E97A2B}
+.btn:hover{background:#F59E0B}
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Kindle Reviewer</h1>
+  <p class="sub">Enter access token to continue</p>
+  <form id="f">
+    <input type="password" id="t" placeholder="Access Token" autofocus>
+    <button type="submit" class="btn">Enter</button>
+  </form>
+  <p class="err" id="e">Token incorrect, please try again.</p>
+</div>
+<script>
+if(document.cookie.includes('kr_auth='))document.getElementById('e').classList.add('show');
+document.getElementById('f').addEventListener('submit',function(e){
+  e.preventDefault();
+  var t=document.getElementById('t').value.trim();
+  if(!t)return;
+  document.cookie='kr_auth='+t+';path=/;max-age=31536000;secure;samesite=strict';
+  window.location.href='/';
+});
+</script>
+</body>
+</html>
