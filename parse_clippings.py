@@ -69,7 +69,7 @@ def parse_metadata(meta_line):
 
     loc_match = re.search(r'Location\s+(\S+)', meta_line, re.IGNORECASE)
     if not loc_match:
-        loc_match = re.search(r'位置\s*#?(\S+)', meta_line)
+        loc_match = re.search(r'位置\s*#?(\d+(?:-\d+)?)', meta_line)
     location = loc_match.group(1).rstrip('|') if loc_match else ''
 
     date_str = ''
@@ -89,6 +89,10 @@ def parse_metadata(meta_line):
                 break
             except ValueError:
                 continue
+        if not date_str:
+            m = re.search(r'(\d{4})年(\d{1,2})月(\d{1,2})日', raw_date)
+            if m:
+                date_str = f'{m.group(1)}-{int(m.group(2)):02d}-{int(m.group(3)):02d}'
         if not date_str:
             date_str = raw_date
 

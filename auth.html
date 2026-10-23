@@ -1,43 +1,79 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kindle Reviewer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign in · Clippings</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F6F3EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161514" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23C2410C'/%3E%3Cpath d='M10.5 7h11a1 1 0 0 1 1 1v17.2l-6.5-4-6.5 4V8a1 1 0 0 1 1-1z' fill='%23fff'/%3E%3C/svg%3E">
+<script>try{var m=localStorage.getItem('kr-theme');if(m==='light'||m==='dark'){document.documentElement.setAttribute('data-theme',m);document.querySelectorAll('meta[name="theme-color"]').forEach(function(x){x.content=m==='dark'?'#161514':'#F6F3EE'})}}catch(e){}</script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#F8F6F3;min-height:100vh;display:flex;align-items:center;justify-content:center}
-.card{background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);padding:40px 36px;max-width:340px;width:100%;text-align:center}
-h1{font-size:1.15rem;font-weight:700;color:#1C1917;margin-bottom:6px}
-.sub{font-size:.82rem;color:#78716C;margin-bottom:24px}
-input[type=password]{width:100%;padding:10px 14px;border:1px solid #E7E5E4;border-radius:8px;font-size:.9rem;outline:none;text-align:center;letter-spacing:2px;transition:border-color .2s}
-input:focus{border-color:#C2410C;box-shadow:0 0 0 3px rgba(194,65,12,.1)}
-.btn{width:100%;margin-top:14px;padding:10px;background:#C2410C;color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;transition:background .15s}
-.btn:hover{background:#9A3412}
-.err{color:#DC2626;font-size:.8rem;margin-top:12px;display:none}
-.err.show{display:block}
-@media(prefers-color-scheme:dark){
-body{background:#1A1A1E}
-.card{background:#25252A;box-shadow:0 4px 12px rgba(0,0,0,.3)}
-h1{color:#E8E6E3}
-.sub{color:#A8A29E}
-input[type=password]{background:#1A1A1E;border-color:#35353A;color:#E8E6E3}
-input:focus{border-color:#E97A2B;box-shadow:0 0 0 3px rgba(233,122,43,.2)}
-.btn{background:#E97A2B}
-.btn:hover{background:#F59E0B}
+:root{
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+  --bg:#F6F3EE;--surface:#FFFFFF;
+  --text:#1F1B16;--text-2:#5F5850;--text-3:#746C62;
+  --border:#E6E0D8;--border-2:#D6CEC3;
+  --accent:#C2410C;--accent-hover:#A8380A;--accent-ink:#FFFFFF;--accent-soft:#FBEADF;
+  --err:#B91C1C;
+  --shadow:0 1px 2px rgba(31,27,22,.05),0 10px 28px -10px rgba(31,27,22,.16);
 }
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#161514;--surface:#201F1D;
+    --text:#ECE8E2;--text-2:#B4ADA3;--text-3:#8E877E;
+    --border:#302D29;--border-2:#45413B;
+    --accent:#F08A4B;--accent-hover:#F59E66;--accent-ink:#1A1209;--accent-soft:rgba(240,138,75,.15);
+    --err:#F87171;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 12px 32px -10px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#161514;--surface:#201F1D;
+  --text:#ECE8E2;--text-2:#B4ADA3;--text-3:#8E877E;
+  --border:#302D29;--border-2:#45413B;
+  --accent:#F08A4B;--accent-hover:#F59E66;--accent-ink:#1A1209;--accent-soft:rgba(240,138,75,.15);
+  --err:#F87171;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 12px 32px -10px rgba(0,0,0,.6);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:var(--bg);color:var(--text);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+button,input{font:inherit;color:inherit}
+h1,p{margin:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{width:100%;max-width:360px;padding:36px 28px 28px;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:var(--shadow);text-align:center}
+.logo{display:block;width:44px;height:44px;margin:0 auto 16px;color:var(--accent)}
+.logo path{fill:var(--surface)}
+h1{font-size:20px;font-weight:700;letter-spacing:-.01em}
+.sub{margin-top:4px;color:var(--text-2);font-size:14px}
+form{margin-top:24px}
+input{display:block;width:100%;height:44px;padding:0 14px;border:1px solid var(--border-2);border-radius:11px;background:var(--bg);outline:none;font-size:16px;letter-spacing:2px;text-align:center;transition:border-color .15s,box-shadow .15s}
+input::placeholder{color:var(--text-3);letter-spacing:normal}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.btn{display:block;width:100%;height:44px;margin-top:12px;border:0;border-radius:11px;background:var(--accent);color:var(--accent-ink);font-size:15px;font-weight:600;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--accent-hover)}
+.err{display:none;margin-top:14px;color:var(--err);font-size:13.5px}
+.err.show{display:block}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<div class="card">
-  <h1>Kindle Reviewer</h1>
-  <p class="sub">Enter access token to continue</p>
+<main class="card">
+  <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M10.5 7h11a1 1 0 0 1 1 1v17.2l-6.5-4-6.5 4V8a1 1 0 0 1 1-1z"/></svg>
+  <h1>Clippings</h1>
+  <p class="sub">Enter your access token to continue.</p>
   <form id="f">
-    <input type="password" id="t" placeholder="Access Token" autofocus>
-    <button type="submit" class="btn">Enter</button>
+    <input type="password" id="t" placeholder="Access token" aria-label="Access token" autocomplete="current-password" autofocus>
+    <button type="submit" class="btn">Continue</button>
   </form>
-  <p class="err" id="e">Token incorrect, please try again.</p>
-</div>
+  <p class="err" id="e" role="alert">That token didn't work. Please try again.</p>
+</main>
 <script>
 if(document.cookie.includes('kr_auth='))document.getElementById('e').classList.add('show');
 document.getElementById('f').addEventListener('submit',function(e){
